@@ -31,7 +31,7 @@
          * @private
          */
         _connect:function(){
-            var socket = this.socket = io();
+            var socket = this.socket = io(this.options.host ? this.options.host : null);
             var _this = this;
 
             socket.on('chat message', function(sender, param){

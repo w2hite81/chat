@@ -3,14 +3,15 @@
   <head>
     <title>Socket.IO chat</title>
     <link rel="stylesheet" type="text/css" href="./assets/css/ncng-chat.css">
-    <script src="./socket.io-1.2.0.js"></script>
-    <script src="./jquery-1.11.1.js"></script>
-    <script src="./jquery-ui.js"></script>
-    <script src="./ncng-chat.js"></script>
+    <script src="http://localhost:30000/socket.io-1.2.0.js"></script>
+    <script src="http://localhost:30000/jquery-1.11.1.js"></script>
+    <script src="http://localhost:30000/jquery-ui.js"></script>
+    <script src="http://localhost:30000/ncng-chat.js"></script>
     <script>
       (function($){
         $(function(){
           $('body').chat();
+//          $('body').chat({host:"http://localhost:30000"});
         });
       })(jQuery);
     </script>

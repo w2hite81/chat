@@ -81,6 +81,6 @@ io.on('connection', function(user){
   });
 });
 
-http.listen(8080, function(){
-  console.log('listening on *:8080');
+http.listen(30000, function(){
+  console.log('listening on *:30000');
 });
