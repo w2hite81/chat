@@ -58,8 +58,10 @@ var NCNG_CONSTANT = {
         WHISPER:'w',
 
         /** 유저 정보 */
-        USERS:'users'
+        USERS:'users',
 
+        /** 명령어 헬프 */
+        HELP:'help'
         // 추가 명령어.
 
     }

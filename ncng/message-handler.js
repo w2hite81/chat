@@ -116,6 +116,13 @@ module.exports.messageHandler = function(user, messageInfo, callback){
                     options.data = tepms;
                 }
                 break;
+            case NCNG_CONSTANT.COMMAND.HELP:
+                options.message = "명령어.";
+                options.data = [];
+                for ( var key in NCNG_CONSTANT.COMMAND) {
+                    options.data.push(NCNG_CONSTANT.COMMAND[key]);
+                }
+                break;
             default :
                 options.message = "정의 되어있지 않는 메세지 입니다.";
                 break;
