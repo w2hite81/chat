@@ -55,7 +55,10 @@ var NCNG_CONSTANT = {
         UPDATE:'update',
 
         /** 귓속말 */
-        WHISPER:'w'
+        WHISPER:'w',
+
+        /** 유저 정보 */
+        USERS:'users'
 
         // 추가 명령어.
 

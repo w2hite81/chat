@@ -53,6 +53,13 @@ function UserManager(){
 
         _users.push(user);
 
+        var _this = this;
+        user.on("disconnect", function(){
+            _this.removeUser(user, function(){
+                // TODO 이벤트 삭제.
+            });
+        });
+
         messageSender.send(user, NCNG_CONSTANT.MESSAGE_EVENT.UPDATE_USER);
         messageSender.send(user, NCNG_CONSTANT.MESSAGE_EVENT.SYSTEM_MESSAGE, {
             message:user.info.nick+"님 환영합니다."
@@ -70,6 +77,7 @@ function UserManager(){
      */
     this.removeUser = function(user, callback) {
         var index = this.getUserIndex(user);
+        console.log(index, user.info);
         if(index > -1) {
             _users.splice(index, 1);
             if(user.room){

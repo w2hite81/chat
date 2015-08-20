@@ -5,6 +5,7 @@
 var util = require("./ncng-util").util;
 var NCNG_CONSTANT = require("./ncng-constant").ncngConstant;
 var roomManager = require('./room-manager').roomManager;
+var userManager = require('./user-manager').userManager;
 var messageSender = require('./message-sender');
 
 module.exports.messageHandler = function(user, messageInfo, callback){
@@ -91,6 +92,28 @@ module.exports.messageHandler = function(user, messageInfo, callback){
                     options.sender = user.info;
                     options.receiverName = messageInfo.getKey(0);
                     options.message = messageInfo.getKey(1);
+                }
+                break;
+            case NCNG_CONSTANT.COMMAND.USERS:
+                var users;
+                if(messageInfo.getKey(0)) {
+                   var roomName = messageInfo.getKey(0);
+                    var room = roomManager.getRoom(roomName);
+                    if(room){
+                        users = room.getUsers();
+                    } else {
+                        options.message = "방이 존재하지 않습니다.";
+                    }
+                } else {
+                    users = userManager.getUsers();
+                }
+                if(users){
+                    var tepms = [];
+                    util.arrayUtil.each(users, function(i, user){
+                        tepms.push(user.info.nick);
+                    });
+                    options.message = "총 " + tepms.length + "명의 사용자가 있습니다.";
+                    options.data = tepms;
                 }
                 break;
             default :

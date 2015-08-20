@@ -17,8 +17,17 @@ app.get('/', function(req, res){
 app.get('/jquery-1.11.1.js', function(req, res){
   res.sendFile(__dirname + '/jquery-1.11.1.js');
 });
+app.get('/jquery-ui.js', function(req, res){
+  res.sendFile(__dirname + '/jquery-ui.js');
+});
 app.get('/socket.io-1.2.0.js', function(req, res){
   res.sendFile(__dirname + '/socket.io-1.2.0.js');
+});
+app.get('/ncng-chat.js', function(req, res){
+  res.sendFile(__dirname + '/ncng-chat.js');
+});
+app.get('/assets/css/ncng-chat.css', function(req, res){
+  res.sendFile(__dirname + '/assets/css/ncng-chat.css');
 });
 
 
@@ -27,12 +36,6 @@ io.on('connection', function(user){
   console.log("user come on.");
 
   userManager.addUser(user, function(){
-
-    user.on("disconnect", function(){
-      userManager.removeUser(user, function(){
-        // TODO 이벤트 삭제.
-      });
-    });
 
     user.on('chat message', function(msg){
       var messageInfo = messageParser.parse(msg);
