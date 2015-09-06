@@ -91,7 +91,7 @@ module.exports.messageHandler = function(user, messageInfo, callback){
                     eventName = NCNG_CONSTANT.MESSAGE_EVENT.WHISPER_MESSAGE;
                     options.sender = user.info;
                     options.receiverName = messageInfo.getKey(0);
-                    options.message = messageInfo.getKey(1);
+                    options.message = messageInfo.getKeys(1);
                 }
                 break;
             case NCNG_CONSTANT.COMMAND.USERS:
