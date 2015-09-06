@@ -23,7 +23,7 @@ var NCNG_CONSTANT = {
         SYSTEM_MESSAGE:"system message",
 
         /** 귓속말 메세지 */
-        WHISPER_MESSAGE:"whisper message"
+        WHISPER_MESSAGE:"whisper message",
     },
 
     /**

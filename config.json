@@ -1,0 +1,6 @@
+{
+  "login":{
+    "url":"http://localhost:30000/getUserInfo",
+    "method":"get"
+  }
+}

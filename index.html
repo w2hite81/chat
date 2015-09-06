@@ -10,8 +10,15 @@
     <script>
       (function($){
         $(function(){
-          $('body').chat();
-//          $('body').chat({host:"http://localhost:30000"});
+//          $('body').chat({});
+          $('body').chat({
+            host:"http://localhost:30000",
+            getKey:function(param, callback) {
+              if($.isFunction(callback)){
+                callback(Math.random()*1000 + new Date().getTime());
+              }
+            }
+          });
         });
       })(jQuery);
     </script>

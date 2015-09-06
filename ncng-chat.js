@@ -34,6 +34,14 @@
             var socket = this.socket = io(this.options.host ? this.options.host : null);
             var _this = this;
 
+            socket.on("getKey", function(param){
+                if($.isFunction(_this.options.getKey)) {
+                    _this.options.getKey(param, function(result){
+                        socket.emit("getKey", result);
+                    });
+                }
+            });
+
             socket.on('chat message', function(sender, param){
                 _this._displayMessage(sender, param);
             });
