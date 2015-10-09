@@ -28,8 +28,12 @@ module.exports.messageHandler = function(user, messageInfo, callback){
                 util.arrayUtil.each(rooms, function(i, room){
                     arr.push(room.getInfo().name + " (" + room.getUsers().length + ")");
                 });
-                options.message = "방 목록";
-                options.data = arr;
+                if(arr.length > 0) {
+                    options.message = "방 목록";
+                    options.data = arr;
+                } else {
+                    options.message = "방이 존재하지 않습니다.";
+                }
                 break;
             case NCNG_CONSTANT.COMMAND.CREATE:
                 if(user.room) {

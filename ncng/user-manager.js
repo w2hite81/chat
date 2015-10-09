@@ -19,7 +19,7 @@
          * @returns {Array}
          */
         this.getUserIndex = function(user){
-            return _users
+            return util.arrayUtil.inArray(user, _users);
         };
 
         /**
@@ -29,6 +29,16 @@
         this.getUserByNick = function(nick) {
             return util.arrayUtil.filter(_users, function(i, user){
                 return user.info.nick == nick;
+            });
+        };
+
+        /**
+         * 아이디로 사용자를 가져온다.
+         * @param Id
+         */
+        this.getUserById = function(user_id) {
+            return util.arrayUtil.filter(_users, function(i, user){
+                return user.info.user_id == user_id;
             });
         };
 
@@ -48,13 +58,14 @@
         this.addUser = function(user, callback) {
             var _this = this;
             this.checkUser(user, function(result){
-                if(!result || !result.nick) {
-                    messageSender.disconnect(user);
-                    return console.error("Login 정보를 확인하세요.");
-                }
+                user.on("disconnect", function(){
+                   _this.removeUser(user);
+                });
                 var info = {};
                 info.nick = result.nick;
-                info.level = result.level;
+                info.user_level = result.user_level;
+                info.user_id = result.user_id;
+                info.session_key = result.session_key;
 
                 user.info = info;
                 console.log(user.info.nick);
@@ -79,40 +90,58 @@
         };
 
         /**
+         * 로그인한 정보 체크.
+         * @param info
+         */
+        this.checkLoingUserInfo = function(info){
+            return this.getUserById(info.user_id);
+        };
+
+        /**
          * 사용자 체크.
          * @param user
          * @param callback
          */
         this.checkUser = function(user, callback) {
-            user.on("getKey", function(result){
-                //user.off("getKey");
+            var _this = this;
+            var getKeyHandler = function(result){
+                user.removeListener("getKey", getKeyHandler);
                 var login = config.login;
-
-                // TODO get post 방식 수정.
-                if(login.method || login.method == "get"){
-                    request(login.url, function(err, httpResponse, body){
-                        console.log(err, httpResponse,body);
-                        if(err) {
+                send({
+                    method:login.method,
+                    url:login.url,
+                    param:result,
+                    onSuccess:function(res, body){
+                        var result = JSON.parse(body);
+                        if(!result || !result.user_id || !result.session_key) {
+                            messageSender.send(user, NCNG_CONSTANT.MESSAGE_EVENT.NOTICE, {
+                                message:"로그인 정보를 확인하세요."
+                            });
                             messageSender.disconnect(user);
-                        } else{
+                            console.error("Login 정보를 확인하세요.");
+                        } else if ( _this.checkLoingUserInfo(result)) {
+                            messageSender.send(user, NCNG_CONSTANT.MESSAGE_EVENT.NOTICE, {
+                                message:"이미 접속한 사용자입니다."
+                            });
+                            messageSender.disconnect(user);
+                        } else if (result.res == 9){
+                            messageSender.send(user, NCNG_CONSTANT.MESSAGE_EVENT.NOTICE, {
+                                message:"정상적인 접속이 아닙니다."
+                            });
+                            messageSender.disconnect(user);
+                        } else {
                             if(util.isFunction(callback)){
-                                callback(JSON.parse(body));
+                                callback(result);
                             }
                         }
-                    });
-                } else {
-                    request.post({url:login.url, form: result}, function(err, httpResponse, body){
-                        console.log(err, httpResponse,body);
-                        if(err) {
-                            messageSender.disconnect(user);
-                        } else{
-                            if(util.isFunction(callback)){
-                                callback(JSON.parse(body));
-                            }
-                        }
-                    });
-                }
-            });
+                    },
+                    onError:function(err){
+                        messageSender.disconnect(user);
+                        console.error("Loing Server 정보를 확인하세요.")
+                    }
+                });
+            };
+            user.on("getKey", getKeyHandler);
             user.emit("getKey");
         };
 
@@ -123,18 +152,56 @@
          */
         this.removeUser = function(user, callback) {
             var index = this.getUserIndex(user);
-            console.log(index, user.info);
             if(index > -1) {
                 _users.splice(index, 1);
                 if(user.room){
                     user.room.leave(user);
                 }
+                var logout = config.logout;
+                send({
+                    method:logout.method,
+                    url:logout.url,
+                    param:{
+                        user_id:user.user_id
+                    },
+                    onSuccess:function (res, body) {
+                        console.log("성공적으로 로그아웃 했습니다.");
+                        if(util.isFunction(callback)){
+                            callback();
+                        }
+                    },
+                    onError:function(err){
+                        console.error("로그아웃을 실패했습니다.", error);
+                    }
+                });
+            } else {
+                if(util.isFunction(callback)){
+                    callback();
+                }
             }
-            if(util.isFunction(callback)){
-                callback();
+
+        };
+    }
+
+    function send(options){
+        var handler = function (err, httpResponse, body) {
+            if(err) {
+                if(util.isFunction(options.onError)) {
+                    options.onError(error);
+                }
+            } else {
+                if(util.isFunction(options.onSuccess)) {
+                    options.onSuccess(httpResponse, body);
+                }
             }
         };
-
+        if(!options.method || options.method == "get") {
+            var url = options.url + util.urlUtil.toParam(options.param);
+            request(url, handler);
+        } else {
+            request.post({url:options.url, form: options.data}, handler);
+        }
     }
+
     module.exports.userManager = new UserManager();
 })();

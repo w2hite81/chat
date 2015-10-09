@@ -7,17 +7,18 @@
     <script src="http://localhost:30000/jquery-1.11.1.js"></script>
     <script src="http://localhost:30000/jquery-ui.js"></script>
     <script src="http://localhost:30000/ncng-chat.js"></script>
+    <script src="http://localhost:30000/ncng-chat-client.js"></script>
     <script>
       (function($){
         $(function(){
-//          $('body').chat({});
           $('body').chat({
-            host:"http://localhost:30000",
-            getKey:function(param, callback) {
-              if($.isFunction(callback)){
-                callback(Math.random()*1000 + new Date().getTime());
+              host:"http://localhost:30000",
+              getSessionKey:function(param, callback) {
+                  if($.isFunction(callback)){
+                      // TODO 세션값을 넘기는것만 필요함. 테스트를 위해서 닉추가.
+                      callback({session:$.getParam("session"), nick:$.getParam("nick")});
+                  }
               }
-            }
           });
         });
       })(jQuery);

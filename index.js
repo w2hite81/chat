@@ -15,6 +15,7 @@
     var NCNG_CONSTANT = require("./ncng/ncng-constant").ncngConstant;
     var util = require("./ncng/ncng-util").util;
 
+    // TODO 차후 삭제.
     app.get('/', function(req, res){
       res.sendFile(__dirname + '/index.html');
     });
@@ -30,14 +31,24 @@
     app.get('/ncng-chat.js', function(req, res){
       res.sendFile(__dirname + '/ncng-chat.js');
     });
+    app.get('/ncng-chat-client.js', function(req, res){
+      res.sendFile(__dirname + '/ncng-chat-client.js');
+    });
     app.get('/assets/css/ncng-chat.css', function(req, res){
       res.sendFile(__dirname + '/assets/css/ncng-chat.css');
+    });
+    app.get('/logout', function(req, res){
+      res.send("success");
     });
     app.get('/getUserInfo', function(req, res){
       console.log("req", req.body);
       var user = {};
-      user.nick = "KEY 값으로 업데이트한 " + util.randomNickName();
-      user.level = NCNG_CONSTANT.LEVEL.USER;
+      user.session_key = req.param("session");
+      user.nick = req.param("nick");
+      user.user_level = NCNG_CONSTANT.LEVEL.USER;
+      user.user_id = "user_" + req.param("session");
+      user.res = req.param("session") ? 0 : 9;
+      console.log(user);
       res.send(user);
     });
 
@@ -50,7 +61,6 @@
       console.log("user come on.");
 
       userManager.addUser(user, function(){
-
         user.on('chat message', function(msg){
           var messageInfo = messageParser.parse(msg);
           if(messageInfo){

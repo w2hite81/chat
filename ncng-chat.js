@@ -31,46 +31,40 @@
          * @private
          */
         _connect:function(){
-            var socket = this.socket = io(this.options.host ? this.options.host : null);
             var _this = this;
-
-            socket.on("getKey", function(param){
-                if($.isFunction(_this.options.getKey)) {
-                    _this.options.getKey(param, function(result){
-                        socket.emit("getKey", result);
-                    });
-                }
+            var client = this._client = new  ChatClient({
+                host:this.options.host,
+                onMessage:function(type, data){
+                    switch(type) {
+                        case 0: // 시스템
+                            _this._displaySystemMessage(data.message);
+                            if(data.data){
+                                $.each(data.data, function(i, message){
+                                    _this._displaySystemMessage(i+1 + ". " + message);
+                                });
+                            }
+                            break;
+                        case 1: // 공지
+                            _this._displayMessage({nick:'공지',level:2}, data.message).css("color", "#ff0000");
+                            break;
+                        case 2: // 일반
+                            _this._displayMessage(data.sender, data.message);
+                            break;
+                        case 3: // 방 채팅.
+                            _this._displayMessage(data.sender, data.message).css("color", "#ff00ff");
+                            break;
+                        case 4: // 귓속말
+                            _this._displayMessage(data.sender, "귓속말:"+ data.message).css("color", "#0000ff");
+                            break;
+                    }
+                },
+                onUserUpdate:function(param){
+                    _this.nickName = param.nick;
+                    _this.user_level = param.user_level;
+                },
+                getSessionKey:this.options.getSessionKey
             });
-
-            socket.on('chat message', function(sender, param){
-                _this._displayMessage(sender, param);
-            });
-
-            socket.on('update user', function(param){
-                _this.nickName = param.nick;
-                _this.level = param.level;
-            });
-
-            socket.on('notice', function(message){
-                _this._displayMessage({nick:'공지',level:2}, message).css("color", "#ff0000");
-            });
-
-            socket.on('system message', function(message, data){
-                _this._displaySystemMessage(message);
-                if(data){
-                    $.each(data, function(i, message){
-                        _this._displaySystemMessage(i+1 + ". " + message);
-                    });
-                }
-            });
-
-            socket.on('whisper message', function(sender, message){
-                _this._displayMessage(sender, "귓속말:"+message).css("color", "#0000ff");
-            });
-
-            socket.on('room message', function(sender, message){
-                _this._displayMessage(sender, message).css("color", "#ff00ff");
-            });
+            client.connect();
         },
         /**
          * 시스템 메세지.
@@ -113,7 +107,8 @@
             var $input = this.element.find('#m');
             var _this = this;
             $('form').submit(function(){
-                _this.socket.emit('chat message', $input.val());
+                _this._client.send($input.val());
+                //_this.socket.emit('chat message', $input.val());
                 $input.val('');
                 return false;
             });
@@ -139,6 +134,38 @@
         FORM:'<form action="">'
             +'<input id="m" autocomplete="off" /><button>Send</button>'
             +'</form>'
+    };
+
+    $.getParam = function(paramName) {
+        var sURL = window.document.URL.toString();
+        if (sURL.indexOf("?") > 0)
+        {
+            var arrParams = sURL.split("?");
+            var arrURLParams = arrParams[1].split("&");
+            var arrParamNames = new Array(arrURLParams.length);
+            var arrParamValues = new Array(arrURLParams.length);
+
+            var i = 0;
+            for (i = 0; i<arrURLParams.length; i++)
+            {
+                var sParam =  arrURLParams[i].split("=");
+                arrParamNames[i] = sParam[0];
+                if (sParam[1] != "")
+                    arrParamValues[i] = unescape(sParam[1]);
+                else
+                    arrParamValues[i] = "No Value";
+            }
+
+            for (i=0; i<arrURLParams.length; i++)
+            {
+                if (arrParamNames[i] == paramName)
+                {
+                    //alert("Parameter:" + arrParamValues[i]);
+                    return arrParamValues[i];
+                }
+            }
+            return "";
+        }
     };
 
 })(jQuery);

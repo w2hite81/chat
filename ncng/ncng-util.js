@@ -26,6 +26,18 @@ module.exports.util = (function(){
         isArray:function(arr){
             return arr && Array.isArray(arr);
         },
+        urlUtil:{
+            toParam:function(obj){
+                var temp = "";
+                if(obj){
+                    for ( var key in obj) {
+                        temp += temp == "" ? "?" : "&";
+                        temp += key + "=" + obj[key];
+                    }
+                }
+                return temp;
+            }
+        },
         stringUtil:{
 
         },
